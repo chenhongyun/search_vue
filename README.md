@@ -1,4 +1,5 @@
 # search_vue
+<<<<<<< HEAD
 
 ## Project setup
 ```
