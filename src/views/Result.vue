@@ -4,7 +4,6 @@
       <a-row>
         <a-auto-complete
           class="global-search"
-          size="large"
           style="width: 700px"
           @select="onSelect"
           optionLabelProp="text"
@@ -22,38 +21,20 @@
               <span className="global-search-item-count">{{ item.count }} results</span>
             </a-select-option>
           </template>
-          <a-input-search placeholder="input search text" @search="onSearch" size="large">
-            <a-button slot="enterButton">搜索</a-button>
+          <a-input-search placeholder="请输入搜索内容" @search="onSearch" enterButton="搜索">
+            <!--<a-button slot="enterButton">搜索</a-button>-->
           </a-input-search>
-          <!--<a-input>-->
-            <!--<a-button-->
-              <!--slot="suffix"-->
-              <!--style="margin-right: -12px"-->
-              <!--class="search-btn"-->
-              <!--size="large"-->
-              <!--type="primary"-->
-            <!--&gt;-->
-              <!--<a-icon type="search" />-->
-            <!--</a-button>-->
-          <!--</a-input>-->
         </a-auto-complete>
       </a-row>
       <a-divider></a-divider>
       <a-row>
         <a-col align="left">
-          <span>综合排序</span>
-          <span>最多点击</span>
-          <span>最新发布</span>
-          <span>最多弹幕</span>
+          <a-checkable-tag v-for="(item, index) in tags1" :checked='item.selected' @change="handleChange(tags1, index)">{{item.tag}}</a-checkable-tag>
         </a-col>
       </a-row>
-      <a-row>
+      <a-row style="margin-top: 10px">
         <a-col align="left">
-          <span>全部时长</span>
-          <span>10分钟以下</span>
-          <span>10-30分钟</span>
-          <span>30-60分钟</span>
-          <span>60分钟以上</span>
+          <a-checkable-tag v-for="(item, index) in tags2" :checked='item.selected' @change="handleChange(tags2, index)">{{item.tag}}</a-checkable-tag>
         </a-col>
       </a-row>
       <a-divider></a-divider>
@@ -67,45 +48,46 @@
         <a-list-item slot="renderItem" slot-scope="item, index" key="item.title">
           <a-row>
             <a-col :span="4">
-              <img :src="item.img" class="img">
+              <img :src="item._source.image" class="img">
+              <!--<a-avatar class="img" :src="item._source.image" shape="square"/>-->
             </a-col>
             <a-col :span="20">
               <a-row>
                 <a-col :span="20" align="left">
                   <span class="pgc-label">电影</span>
-                  <span class="title" v-html="item.title"></span>
+                  <span class="title" v-html="item._source.title"></span>
                 </a-col>
                 <a-col :span="4" align="right">
-                  <span class="score">9.9分</span>
+                  <span class="score">{{item._source.score}}分</span>
                 </a-col>
               </a-row>
               <a-row style="margin-top: 15px">
                 <a-col :span="8" align="left">
                 <span class="label">风格：</span>
-                <span class="value">剧情/犯罪/小说改</span>
+                <span class="value">{{item._source.categories}}</span>
               </a-col>
                 <a-col :span="8" align="left">
                   <span class="label">地区：</span>
-                  <span class="value">美国</span>
+                  <span class="value">{{item._source.area}}</span>
                 </a-col>
                 <a-col :span="8" align="right">
-                  <span class="value">2.0万人点评</span>
+                  <span class="value">{{item._source.commentCount}}人点评</span>
                 </a-col>
               </a-row>
               <a-row style="margin-top: 5px">
                 <a-col :span="8" align="left">
                   <span class="label">上映时间：</span>
-                  <span class="value">1994-09-23</span>
+                  <span class="value">{{item._source.pub}}</span>
                 </a-col>
                 <a-col :span="16" align="left">
                   <span class="label">出演：</span>
-                  <span class="value">蒂姆·罗宾斯 摩根·弗里曼 鲍勃·冈顿 威廉姆·赛德勒 克兰西·布朗 吉尔·贝罗斯 马克·罗</span>
+                  <span class="value">{{item._source.performer}}</span>
                 </a-col>
               </a-row>
               <a-row >
                 <a-col align="left">
                   <div>
-                    <span class="introduction" v-html="'简介：'+item.introduction"></span>
+                    <span class="introduction" v-html="'简介：'+item._source.description"></span>
                   </div>
                 </a-col>
               </a-row>
@@ -126,7 +108,7 @@
                 <a-col align="left">
                   <span class="source">来源：</span>
                   <a href="https://www.bilibili.com/bangumi/play/ss28274/?from=search&seid=16358216024794183601">
-                    <span class="source">哔哩哔哩</span>
+                    <span class="source">{{item._source.resource}}</span>
                   </a>
                 </a-col>
               </a-row>
@@ -141,31 +123,133 @@
 <script>
 import ARow from "ant-design-vue/es/grid/Row";
 import ACol from "ant-design-vue/es/grid/Col";
+import { getAll } from "../api/search";
+
 export default {
   name: "Result",
   components: {ACol, ARow},
   data () {
     return {
       loading: true,
+      tags1: [],
+      tags2: [],
       listData: [],
       pagination: {
         onChange: page => {
           console.log(page)
         },
         pageSize: 10,
+        // showTotal: true,
         showSizeChanger: true,
         showQuickJumper: true
       }
     }
   },
   created () {
-    for (var i=0;i<15;i++){
-      this.listData.push({
-        img: '/imgs/pic/xiaoshenke.jpg',
-        title: `体制化与希望《<span style="color: red">肖申克的救赎</span>》`,
-        introduction: `自制 用19年的时间，从监狱里面逃出，或者有人不敢想，所以做不到，或者有人敢想，但是做不到，只有安迪一个人想到了，然后做到了。因为别人都不这么做，或者别人被体制化了而觉得不可能，我们就会觉得这样不行。这样看来，监狱其实可以看作我们生活的社会自制 用19...`,
-      })
-    }
+    this.getTags()
+    this.axios.get('/api/_search?size=400').then(res => {
+      console.log('得到结果')
+      console.log(res.data.hits.hits)
+      this.listData = res.data.hits.hits
+    })
+    // getAll().then(res => {
+    //   console.log('得到结果')
+    //   console.log(res)
+    // })
+    // for (var i=0;i<15;i++){
+    //   this.listData.push({
+    //     img: '/imgs/pic/xiaoshenke.jpg',
+    //     title: `体制化与希望《<span style="color: red">肖申克的救赎</span>》`,
+    //     introduction: `自制 用19年的时间，从监狱里面逃出，或者有人不敢想，所以做不到，或者有人敢想，但是做不到，只有安迪一个人想到了，然后做到了。因为别人都不这么做，或者别人被体制化了而觉得不可能，我们就会觉得这样不行。这样看来，监狱其实可以看作我们生活的社会自制 用19...`,
+    //   })
+    // }
+  },
+  methods: {
+    onSelect () {
+
+    },
+    getTags () {
+      this.tags1 = [
+        {
+          tag: '综合排序',
+          selected: true
+        },
+        {
+          tag: '最多点击',
+          selected: false
+        },
+        {
+          tag: '最新发布',
+          selected: false
+        },
+        {
+          tag: '最多弹幕',
+          selected: false
+        }
+      ]
+      this.tags2 = [
+        {
+          tag: '全部时长',
+          selected: true
+        },
+        {
+          tag: '10分钟以下',
+          selected: false
+        },
+        {
+          tag: '10-30分钟',
+          selected: false
+        },
+        {
+          tag: '30-60分钟',
+          selected: false
+        },
+        {
+          tag: '60分钟以上',
+          selected: false
+        }
+      ]
+    },
+    handleChange (arr, index) {
+      // console.log(checked)
+      arr[index].selected = !arr[index].selected
+      if (index === 0) {
+        if (arr[index].selected === true) {
+          for (let i = 1; i < arr.length; i++) {
+            if (i !== index) {
+              arr[i].selected = false
+            }
+          }
+        } else {
+          arr[0].selected = true
+        }
+      } else {
+        if (arr[index].selected === true) {
+          arr[0].selected = false
+        } else {
+          let flag = false
+          for (let i = 1; i < arr.length; i++) {
+            if (arr[i].selected) {
+              flag = true
+            }
+          }
+          if (!flag) {
+            arr[0].selected = true
+          }
+        }
+      }
+      // if (index !== 0 && arr[index].selected === true) {
+      //   arr[0].selected = false
+      // }
+      // if (index === 0 && arr[index].selected === true) {
+      //   for (let i = 1; i < arr.length; i++) {
+      //     if (i !== index) {
+      //       arr[i].selected = false
+      //     }
+      //   }
+      // }
+      // todo 每一次点击都需要再一次请求
+    },
   }
 }
 </script>
@@ -203,6 +287,12 @@ export default {
   .value {
     line-height: 16px;
     color: #222;
+    /*width: 100%;*/
+    /*!*float: left !important;*!*/
+    /*overflow: hidden;!*和text-overflow: ellipsis;成对出现*!*/
+    /*white-space: nowrap;!*不换行显示*!*/
+    /*text-overflow: ellipsis;*/
+    /*display:block;*/
   }
   .score {
     color: #ffa726;

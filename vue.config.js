@@ -69,15 +69,31 @@ module.exports = {
     // development server port 8000
     port: 8080,
     proxy: {
-      '/pic': {
-        target: 'http://i0.hdslb.com',
-        // ws: true,
-        changeOrigin: true,
-        // pathRewrite: {
-        //   '^/pic': ''
-        // }
+      "/api":{
+        target:"http://112.126.58.87:9200/movie/_doc",
+        changeOrigin:true,
+        pathRewrite:{
+          "^/api":""
+        }
       }
     }
+    // proxy: {
+    //   '/api':{
+    //     target:'http://112.126.58.87:9200/movie/_doc/',
+    //     changeOrigin:true, //是否跨域
+    //     pathRewrite:{
+    //       '^/api':'http://112.126.58.87:9200/movie/_doc/' //规定请求地址以什么作为开头
+    //     }
+    //   },
+    //   '/pic': {
+    //     target: 'http://i0.hdslb.com',
+    //     // ws: true,
+    //     changeOrigin: true,
+    //     // pathRewrite: {
+    //     //   '^/pic': ''
+    //     // }
+    //   }
+    // }
   },
 
   lintOnSave: undefined,
