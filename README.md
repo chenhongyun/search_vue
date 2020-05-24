@@ -1,30 +1,30 @@
 # search_vue
 
-## Project setup
-```
-yarn install
+> 基于vue-cli4和[ant-design-vue](https://www.antdv.com/docs/vue/introduce-cn/)搭建的电影搜索引擎系统的前端部分。
+
+## 安装依赖
+
+> 安装yarn包管理工具
+
+
+
+> 安装前端依赖
+```sh
+# 进入到search_vue目录
+$ cd search_vue
+
+# 安装依赖,比较耗时
+$ yarn install
 ```
 
-### Compiles and hot-reloads for development
-```
-yarn serve
+
+## 运行
+```sh
+# 启动项目
+$ yarn serve
 ```
 
-### Compiles and minifies for production
-```
-yarn build
-```
 
-### Run your unit tests
-```
-yarn test:unit
-```
-
-### Lints and fixes files
-```
-yarn lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+## 访问
+> 访问 [localhost:8080](http://localhost:8080) 进入系统
 
