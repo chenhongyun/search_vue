@@ -2,8 +2,7 @@
   <div class="home">
 
     <a-row>
-      <a-col :span="6"></a-col>
-      <a-col :span="12" >
+      <a-col :span="12" :offset="1">
         <a-auto-complete
           class="global-search"
           size="large"
@@ -28,7 +27,7 @@
           <a-input-search placeholder="搜索电影、综艺、影人" @search="onSearch" size="large" enterButton="搜索一下"></a-input-search>
         </a-auto-complete>
         <a-card :bordered="false" align="left" title="本站推荐" :body-style="{padding: '10px'}" style="margin-top: 20px">
-          <a-carousel arrows>
+          <a-carousel arrows autoplay>
             <div
               slot="prevArrow"
               slot-scope="props"
@@ -40,10 +39,39 @@
             <div slot="nextArrow" slot-scope="props" class="custom-slick-arrow" style="right: 10px">
               <a-icon type="right-circle" />
             </div>
-            <div><h3>1</h3></div>
-            <div><h3>2</h3></div>
-            <div><h3>3</h3></div>
-            <div><h3>4</h3></div>
+            <div><h3>haodene </h3></div>
+            <div><h3>haodene </h3></div>
+            <div>
+              <img src="https://img9.doubanio.com/view/photo/s_ratio_poster/public/p2540924496.jpg" style="width: 400px; height: 200px"/>
+            </div>
+            <div>
+              <img src="https://img9.doubanio.com/view/photo/s_ratio_poster/public/p2455050536.jpg" style="width: 400px; height: 200px"/>
+            </div>
+            <div>
+              <img src="https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2586366121.jpg" style="width: 400px; height: 200px"/>
+            </div>
+            <div>
+              <img src="https://img1.doubanio.com/view/photo/s_ratio_poster/public/p2574861328.jpg" style="width: 400px; height: 200px"/>
+            </div>
+            <div>
+              <img src="https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2603749783.jpg" style="width: 400px; height: 200px"/>
+            </div>
+            <div>
+              <img src="https://img1.doubanio.com/view/photo/s_ratio_poster/public/p2586800409.jpg" style="width: 400px; height: 200px"/>
+            </div>
+            <div align="left" style="background-color: #FFFF">
+              <a-row>
+                <a-col :span="12">
+                  <img src="https://img1.doubanio.com/view/photo/s_ratio_poster/public/p2593664928.jpg" style="width: 400px; height: 200px"/>
+                </a-col>
+                <a-col :span="12">
+                  <span>阿萨德飞机嘎哈我饿UI发送的讲课费</span>
+                </a-col>
+              </a-row>
+            </div>
+            <div>
+              <img src="https://img1.doubanio.com/view/photo/s_ratio_poster/public/p2593312729.jpg" style="width: 400px; height: 180px"/>
+            </div>
           </a-carousel>
         </a-card>
         <a-card :bordered="false" align="left">
@@ -51,7 +79,19 @@
             <a-tab-pane key="1" tab="最近热门电影">
               <a-list :grid="{ gutter: 24, column: 6 }" :data-source="hotMovie" :pagination="pagination">
                 <a-list-item slot="renderItem" slot-scope="item, index">
-                  <a-card :bordered="false" :body-style="{padding: '0', width: '120px', height: '200px'}" align="center">
+                  <!--<a-card hoverable style="width: 120px; height: 160px" >-->
+                    <!--<img-->
+                      <!--slot="cover"-->
+                      <!--:src="item.imagePath"-->
+                      <!--class="img"-->
+                    <!--/>-->
+                    <!--<a-card-meta :title="item.name" style="height: 40px;">-->
+                      <!--&lt;!&ndash;<template slot="description">&ndash;&gt;-->
+                        <!--&lt;!&ndash;<span style="margin-left: 10px;color: #ffa726;">{{item.score}}</span>&ndash;&gt;-->
+                      <!--&lt;!&ndash;</template>&ndash;&gt;-->
+                    <!--</a-card-meta>-->
+                  <!--</a-card>-->
+                  <a-card hoverable :body-style="{padding: '0', width: '120px', height: '200px'}" align="center">
                     <a @click="goToDetails(hotMovie, index, '最近热门电影')">
                       <img :src="item.imagePath" class="img">
                       <span>{{item.name}}</span>
@@ -107,7 +147,70 @@
           </a-list>
         </a-card>
       </a-col>
-      <a-col :span="6"></a-col>
+      <a-col :span="5" align="left">
+        <a-card :bordered="false" :title="'热搜排行榜 (Top'+rankList.length+')'" style="margin-top: 180px; margin-left: 30px" :headStyle="{padding: '0'}" :body-style="{padding: '0'}">
+          <a-popover slot="extra" placement="top">
+            <template slot="content">
+              <span>列表展示</span>
+            </template>
+            <a @click="changeShowMode(0)">
+              <a-icon type="ordered-list" style="margin-right: 10px"/>
+            </a>
+          </a-popover>
+          <a-popover slot="extra" placement="top">
+            <template slot="content">
+              <span>词云展示</span>
+            </template>
+            <a @click="changeShowMode(1)">
+              <a-icon type="cloud" />
+            </a>
+          </a-popover>
+          <div
+            v-show="showMode===0"
+            v-infinite-scroll="loadMore"
+            :infinite-scroll-disabled="busy"
+            class="demo-infinite-container"
+            :infinite-scroll-distance="10"
+          >
+            <a-list item-layout="vertical" size="small" :data-source="rankList" style="margin-top: 10px">
+              <a-list-item slot="renderItem" slot-scope="item, index" style="height: 35px" @mouseenter="mouseEnter(index)">
+                <a @click="onSearch(item.name)">
+                  <div v-if="rankItemIndex!==index" style="margin-top:-9px; height: 35px">
+                    <a-row>
+                      <a-col :span="2">
+                        <span class="rank-text">{{index+1}}</span>
+                      </a-col>
+                      <a-col :span="18">
+                        <span class="rank-text">{{ item.name }}</span>
+                      </a-col>
+                      <a-col :span="3" align="right">
+                        <span class="rank-text">{{ item.value }}</span>
+                      </a-col>
+                    </a-row>
+                  </div>
+                  <div v-if="rankItemIndex===index" style="margin-top:-9px; height: 35px; background-color: #40A9FF">
+                    <a-row >
+                      <a-col :span="2">
+                        <span class="rank-text">{{index+1}}</span>
+                      </a-col>
+                      <a-col :span="18">
+                        <span class="rank-text">{{ item.name }}</span>
+                      </a-col>
+                      <a-col :span="3" align="right">
+                        <span class="rank-text">{{ item.value }}</span>
+                      </a-col>
+                    </a-row>
+                  </div>
+                </a>
+              </a-list-item>
+              <div v-if="rankLoading && !busy" class="demo-loading-container">
+                <a-spin />
+              </div>
+            </a-list>
+          </div>
+          <div v-show="showMode===1" id="wordCloud" style="width: 350px; height: 1000px"></div>
+        </a-card>
+      </a-col>
     </a-row>
 
     <a-modal
@@ -166,7 +269,15 @@
         dataSource: [],
         hotMovie: [],
         comingMovie: [],
-        page: 1,
+        // 排行相关
+        rankList: [],
+        rankData: [],
+        rankItemIndex: -1,  // 用来记录当前鼠标停在哪一个item，进而去改变相应item的style
+        showMode: 0,  // 用来表示使用列表or词云展示，0表示列表，1表示词云
+        busy: false, // vue-infinite-scroll需要用到
+        rankLoading: false, // vue-infinite-scroll需要用到
+
+        page: 1,  // 用来计算大图总的index
         pagination: {
           onChange: page => {
             console.log(page)
@@ -288,17 +399,60 @@
           'description': '楚门（金•凯瑞 Jim Carrey 饰）是一个平凡得不能再平凡的人，除了一些有些稀奇的经历之外——初恋女友突然失踪、溺水身亡的父亲忽然似乎又出现在眼前，他和绝大多数30多岁的美国男人绝无异样。这令他倍感失落。他也曾试过离开自己生活了多年的地方，但总因种种理由而不能成行。'
         }
       ]
+      this.rankList = [
+        {
+          name: '两会讲话',
+          value: 100
+        },
+        {
+          name: '习近平',
+          value: 90
+        },
+        {
+          name: '肺炎',
+          value: 87
+        },
+        {
+          name: '少年的你',
+          value: 68
+        },
+        {
+          name: '肖申克的救赎',
+          value: 49
+        },
+        {
+          name: '幸福人生',
+          value: 35
+        },
+        {
+          name: '辛德勒的名单',
+          value: 28
+        },
+        {
+          name: '蝙蝠侠',
+          value: 23
+        },
+        {
+          name: '钢铁侠',
+          value: 17
+        },
+        {
+          name: '我不是药神',
+          value: 9
+        }
+      ]
+    },
+    mounted () {
+      this.drawWordCloud()
     },
     methods: {
       onSelect(value) {
         console.log('onSelect', value);
         this.onSearch(value)
       },
-
       handleSearch(value) {
         this.dataSource = value ? this.searchResult(value) : [];
       },
-
       onSearch (value) {
         console.log("搜索内容：", value)
         if (value !== ''){
@@ -341,7 +495,91 @@
       },
       toRight () {
         this.detailParams.index += 1
-      }
+      },
+      // 排行榜相关
+      mouseEnter (index) {
+        this.rankItemIndex = index
+      },
+      changeShowMode (state) {
+        this.showMode = state
+        if (this.showMode===1) {
+          this.drawWordCloud()
+        }
+      },
+      rankSearch(key) {
+
+      },
+      loadMore () {
+        console.log('加载更多')
+        this.rankLoading = true
+        if (this.rankList.length >= 50) {
+          // 当加载结束的时候提示已经加载完毕
+          this.$message.warning('最多加载50条热门搜索')
+          this.busy = true
+          this.rankLoading = false
+          return
+        }
+        // todo 获取更多10条热搜
+        for (let i = 0; i < 10; i++) {
+          this.rankList.push(
+            {
+              name: '新增热搜'+this.getRandomInt(100000),
+              value: this.getRandomInt(100)
+            }
+          )
+        }
+        this.imageLoading = false
+      },
+      drawWordCloud () {
+        // 基于准备好的dom，初始化echarts实例
+        const myChart = this.$echarts.init(document.getElementById('wordCloud'))
+        // 绘制图表
+        const option = {
+          backgroundColor: '#F7F7F7',
+          tooltip: {
+            show: true
+          },
+          series: [{
+            // name: res.data.resultBody.groupName,
+            type: 'wordCloud',
+            // sizeRange: [6, 66],
+            size: ['100%', '100%'],
+            textRotation: [0, 45, 90, -45],
+            textPadding: 0,
+            autoSize: {
+              enable: true,
+              minSize: 14
+            },
+            textStyle: {
+              normal: {
+                color: function () {
+                  return 'rgb(' + [
+                    Math.round(Math.random() * 160),
+                    Math.round(Math.random() * 160),
+                    Math.round(Math.random() * 160)
+                  ].join(',') + ')'
+                }
+              },
+              emphasis: {
+                shadowBlur: 10,
+                shadowColor: '#333'
+              }
+            },
+            data: this.rankList
+          }]
+        }
+
+        // 为echarts对象加载数据
+        myChart.setOption(option)
+
+        //  增加监听事件
+        let that = this
+        function eConsole (param) {
+          console.log(param.data.name)
+          that.onSearch(param.data.name)
+        }
+        myChart.on('click', eConsole)
+      },
     },
   }
 </script>
@@ -369,7 +607,6 @@
     background: #364d79;
     overflow: hidden;
   }
-
   .ant-carousel >>> .custom-slick-arrow {
     width: 25px;
     height: 25px;
@@ -387,6 +624,24 @@
 
   .ant-carousel >>> .slick-slide h3 {
     color: #fff;
+  }
+  /*排行相关*/
+  .rank-text {
+    line-height: 35px;
+    color: black;
+  }
+  .demo-infinite-container {
+    border: 1px solid #e8e8e8;
+    border-radius: 4px;
+    overflow: auto;
+    padding: 8px 24px;
+    height: 500px;
+  }
+  .demo-loading-container {
+    position: absolute;
+    bottom: 10px;
+    width: 100%;
+    text-align: center;
   }
 </style>
 
