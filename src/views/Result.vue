@@ -8,20 +8,21 @@
           @select="onSelect"
           optionLabelProp="text"
         >
-          <template slot="dataSource">
-            <a-select-option v-for="item in dataSource" :key="item.category" :text="item.category">
-              Found {{ item.query }} on
-              <a
-                :href="`https://s.taobao.com/search?q=${item.query}`"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {{ item.category }}
-              </a>
-              <span className="global-search-item-count">{{ item.count }} results</span>
-            </a-select-option>
-          </template>
+          <!--<template slot="dataSource">-->
+            <!--<a-select-option v-for="item in dataSource" :key="item.category" :text="item.category">-->
+              <!--Found {{ item.query }} on-->
+              <!--<a-->
+                <!--:href="`https://s.taobao.com/search?q=${item.query}`"-->
+                <!--target="_blank"-->
+                <!--rel="noopener noreferrer"-->
+              <!--&gt;-->
+                <!--{{ item.category }}-->
+              <!--</a>-->
+              <!--<span className="global-search-item-count">{{ item.count }} results</span>-->
+            <!--</a-select-option>-->
+          <!--</template>-->
           <a-input-search placeholder="请输入搜索内容" @search="onSearch" enterButton="搜索">
+          <!--<a-input-search placeholder="请输入搜索内容" enterButton="搜索">-->
             <!--<a-button slot="enterButton">搜索</a-button>-->
           </a-input-search>
         </a-auto-complete>
@@ -48,46 +49,46 @@
         <a-list-item slot="renderItem" slot-scope="item, index" key="item.title">
           <a-row>
             <a-col :span="4">
-              <img :src="item._source.image" class="img">
+              <img :src="item.image" class="img">
               <!--<a-avatar class="img" :src="item._source.image" shape="square"/>-->
             </a-col>
             <a-col :span="20">
               <a-row>
                 <a-col :span="20" align="left">
                   <span class="pgc-label">电影</span>
-                  <span class="title" v-html="item._source.title"></span>
+                  <span class="title" v-html="item.title"></span>
                 </a-col>
                 <a-col :span="4" align="right">
-                  <span class="score">{{item._source.score}}分</span>
+                  <span class="score">{{item.score}}分</span>
                 </a-col>
               </a-row>
               <a-row style="margin-top: 15px">
                 <a-col :span="8" align="left">
                 <span class="label">风格：</span>
-                <span class="value">{{item._source.categories}}</span>
+                <span class="value">{{item.categories}}</span>
               </a-col>
                 <a-col :span="8" align="left">
                   <span class="label">地区：</span>
-                  <span class="value">{{item._source.area}}</span>
+                  <span class="value">{{item.area}}</span>
                 </a-col>
                 <a-col :span="8" align="right">
-                  <span class="value">{{item._source.commentCount}}人点评</span>
+                  <span class="value">{{item.commentCount}}人点评</span>
                 </a-col>
               </a-row>
               <a-row style="margin-top: 5px">
                 <a-col :span="8" align="left">
                   <span class="label">上映时间：</span>
-                  <span class="value">{{item._source.pub}}</span>
+                  <span class="value">{{item.pub}}</span>
                 </a-col>
                 <a-col :span="16" align="left">
                   <span class="label">出演：</span>
-                  <span class="value">{{item._source.performer}}</span>
+                  <span class="value">{{item.performer}}</span>
                 </a-col>
               </a-row>
               <a-row >
                 <a-col align="left">
                   <div>
-                    <span class="introduction" v-html="'简介：'+item._source.description"></span>
+                    <span class="introduction" v-html="'简介：'+item.description"></span>
                   </div>
                 </a-col>
               </a-row>
@@ -108,7 +109,7 @@
                 <a-col align="left">
                   <span class="source">来源：</span>
                   <a href="https://www.bilibili.com/bangumi/play/ss28274/?from=search&seid=16358216024794183601">
-                    <span class="source">{{item._source.resource}}</span>
+                    <span class="source">{{item.resource}}</span>
                   </a>
                 </a-col>
               </a-row>
@@ -142,28 +143,38 @@ export default {
         // showTotal: true,
         showSizeChanger: true,
         showQuickJumper: true
+      },
+      getList () {
+        this.axios.get('http://112.126.58.87:9000/search?q='+this.$route.query.search_text).then(res => {
+        // this.axios.get('http://112.126.58.87:9000/api/_search?size=30').then(res => {
+        // this.axios.get('/api/_search?size=400').then(res => {
+          console.log('得到结果', res)
+          console.log(res.data.resultBody.movieList)
+          this.listData = res.data.resultBody.movieList
+        })
       }
     }
   },
   created () {
     this.getTags()
-    this.axios.get('/api/_search?size=400').then(res => {
-      console.log('得到结果')
-      console.log(res.data.hits.hits)
-      this.listData = res.data.hits.hits
-    })
-    // getAll().then(res => {
-    //   console.log('得到结果')
-    //   console.log(res)
+    this.getList()
+    // this.axios.get('http://112.126.58.87:9000/api/_search?size=400').then(res => {
+    // // this.axios.get('/api/_search?size=400').then(res => {
+    //   console.log('得到结果', res)
+    //   console.log(res.data.hits.hits)
+    //   this.listData = res.data.hits.hits
     // })
-    // for (var i=0;i<15;i++){
-    //   this.listData.push({
-    //     img: '/imgs/pic/xiaoshenke.jpg',
-    //     title: `体制化与希望《<span style="color: red">肖申克的救赎</span>》`,
-    //     introduction: `自制 用19年的时间，从监狱里面逃出，或者有人不敢想，所以做不到，或者有人敢想，但是做不到，只有安迪一个人想到了，然后做到了。因为别人都不这么做，或者别人被体制化了而觉得不可能，我们就会觉得这样不行。这样看来，监狱其实可以看作我们生活的社会自制 用19...`,
-    //   })
-    // }
   },
+  // beforeUpdate () {
+  //   this.axios.get('/api/_search?size=400').then(res => {
+  //     console.log('得到结果', res)
+  //     console.log(res.data.hits.hits)
+  //     this.listData = res.data.hits.hits
+  //   })
+  // },
+  // mounted () {
+  //
+  // },
   methods: {
     onSelect () {
 
@@ -250,6 +261,18 @@ export default {
       // }
       // todo 每一次点击都需要再一次请求
     },
+    onSearch (value) {
+      console.log("搜索内容：", value)
+      if (value !== ''){
+        this.axios.get('http://112.126.58.87:9000/search?q='+value).then(res => {
+          // this.axios.get('http://112.126.58.87:9000/api/_search?size=30').then(res => {
+          // this.axios.get('/api/_search?size=400').then(res => {
+          console.log('得到结果', res)
+          console.log(res.data.all_hits)
+          this.listData = res.data.all_hits
+        })
+      }
+    },
   }
 }
 </script>
@@ -335,5 +358,8 @@ export default {
   .source {
     line-height: 16px;
     color: #81C382;
+  }
+  .keyword{
+    color: red
   }
 </style>

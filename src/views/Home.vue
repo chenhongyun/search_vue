@@ -12,17 +12,20 @@
           optionLabelProp="text"
         >
           <template slot="dataSource">
-            <a-select-option v-for="item in dataSource" :key="item.category" :text="item.category">
-              Found {{ item.query }} on
-              <a
-                :href="`https://s.taobao.com/search?q=${item.query}`"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {{ item.category }}
-              </a>
-              <span className="global-search-item-count">{{ item.count }} results</span>
+            <a-select-option v-for="item in dataSource" :key="item">
+              {{ item }}
             </a-select-option>
+            <!--<a-select-option v-for="item in dataSource" :key="item.category" :text="item.category">-->
+              <!--Found {{ item.query }} on-->
+              <!--<a-->
+                <!--:href="`https://s.taobao.com/search?q=${item.query}`"-->
+                <!--target="_blank"-->
+                <!--rel="noopener noreferrer"-->
+              <!--&gt;-->
+                <!--{{ item.category }}-->
+              <!--</a>-->
+              <!--<span className="global-search-item-count">{{ item.count }} results</span>-->
+            <!--</a-select-option>-->
           </template>
           <a-input-search placeholder="搜索电影、综艺、影人" @search="onSearch" size="large" enterButton="搜索一下"></a-input-search>
         </a-auto-complete>
@@ -79,18 +82,6 @@
             <a-tab-pane key="1" tab="最近热门电影">
               <a-list :grid="{ gutter: 24, column: 6 }" :data-source="hotMovie" :pagination="pagination">
                 <a-list-item slot="renderItem" slot-scope="item, index">
-                  <!--<a-card hoverable style="width: 120px; height: 160px" >-->
-                    <!--<img-->
-                      <!--slot="cover"-->
-                      <!--:src="item.imagePath"-->
-                      <!--class="img"-->
-                    <!--/>-->
-                    <!--<a-card-meta :title="item.name" style="height: 40px;">-->
-                      <!--&lt;!&ndash;<template slot="description">&ndash;&gt;-->
-                        <!--&lt;!&ndash;<span style="margin-left: 10px;color: #ffa726;">{{item.score}}</span>&ndash;&gt;-->
-                      <!--&lt;!&ndash;</template>&ndash;&gt;-->
-                    <!--</a-card-meta>-->
-                  <!--</a-card>-->
                   <a-card hoverable :body-style="{padding: '0', width: '120px', height: '200px'}" align="center">
                     <a @click="goToDetails(hotMovie, index, '最近热门电影')">
                       <img :src="item.imagePath" class="img">
@@ -136,7 +127,7 @@
                   <template slot="title">
                     <span>{{item.name}}</span>
                   </template>
-                  <a @click="goToDetails(hotMovie, index, '最近热门电影')">
+                  <a>
                     <img :src="item.imagePath" class="img">
                     <span>{{item.name}}</span>
                     <span style="margin-left: 10px;color: #ffa726;">{{item.score}}</span>
@@ -148,7 +139,7 @@
         </a-card>
       </a-col>
       <a-col :span="5" align="left">
-        <a-card :bordered="false" :title="'热搜排行榜 (Top'+rankList.length+')'" style="margin-top: 180px; margin-left: 30px" :headStyle="{padding: '0'}" :body-style="{padding: '0'}">
+        <a-card :bordered="false" :title="'热搜排行榜 (Top'+(rankList.length===1?0:rankList.length)+')'" style="margin-top: 180px; margin-left: 30px" :headStyle="{padding: '0'}" :body-style="{padding: '0'}">
           <a-popover slot="extra" placement="top">
             <template slot="content">
               <span>列表展示</span>
@@ -175,13 +166,16 @@
             <a-list item-layout="vertical" size="small" :data-source="rankList" style="margin-top: 10px">
               <a-list-item slot="renderItem" slot-scope="item, index" style="height: 35px" @mouseenter="mouseEnter(index)">
                 <a @click="onSearch(item.name)">
-                  <div v-if="rankItemIndex!==index" style="margin-top:-9px; height: 35px">
-                    <a-row>
+                  <div v-if="rankItemIndex!==index" style="margin-top:-9px; height: 35px;">
+                    <a-row style="">
                       <a-col :span="2">
-                        <span class="rank-text">{{index+1}}</span>
+                        <span v-if="item.value" class="rank-text">{{index+1}}</span>
                       </a-col>
                       <a-col :span="18">
-                        <span class="rank-text">{{ item.name }}</span>
+                        <span class="rank-text" style="width:80px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;word-break:keep-all;">
+                          {{ item.name | ellip }}
+                          <!--{{ item.name }}-->
+                        </span>
                       </a-col>
                       <a-col :span="3" align="right">
                         <span class="rank-text">{{ item.value }}</span>
@@ -194,7 +188,9 @@
                         <span class="rank-text">{{index+1}}</span>
                       </a-col>
                       <a-col :span="18">
-                        <span class="rank-text">{{ item.name }}</span>
+                        <span class="rank-text" style="width:80px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;word-break:keep-all;">
+                          {{ item.name }}
+                        </span>
                       </a-col>
                       <a-col :span="3" align="right">
                         <span class="rank-text">{{ item.value }}</span>
@@ -264,13 +260,24 @@
   export default {
     name: 'Home',
     components: {ACol, ARow},
+    filters: {
+      //超过20位显示...
+      ellip: function(value) {
+        if (!value) return "";
+        if (value.length > 16) {
+          return value.slice(0, 16) + "...";
+        }
+        return value;
+      }
+    },
     data() {
       return {
         dataSource: [],
         hotMovie: [],
         comingMovie: [],
         // 排行相关
-        rankList: [],
+        topn: 10,  // 请求top n的参数
+        rankList: [0],
         rankData: [],
         rankItemIndex: -1,  // 用来记录当前鼠标停在哪一个item，进而去改变相应item的style
         showMode: 0,  // 用来表示使用列表or词云展示，0表示列表，1表示词云
@@ -399,48 +406,7 @@
           'description': '楚门（金•凯瑞 Jim Carrey 饰）是一个平凡得不能再平凡的人，除了一些有些稀奇的经历之外——初恋女友突然失踪、溺水身亡的父亲忽然似乎又出现在眼前，他和绝大多数30多岁的美国男人绝无异样。这令他倍感失落。他也曾试过离开自己生活了多年的地方，但总因种种理由而不能成行。'
         }
       ]
-      this.rankList = [
-        {
-          name: '两会讲话',
-          value: 100
-        },
-        {
-          name: '习近平',
-          value: 90
-        },
-        {
-          name: '肺炎',
-          value: 87
-        },
-        {
-          name: '少年的你',
-          value: 68
-        },
-        {
-          name: '肖申克的救赎',
-          value: 49
-        },
-        {
-          name: '幸福人生',
-          value: 35
-        },
-        {
-          name: '辛德勒的名单',
-          value: 28
-        },
-        {
-          name: '蝙蝠侠',
-          value: 23
-        },
-        {
-          name: '钢铁侠',
-          value: 17
-        },
-        {
-          name: '我不是药神',
-          value: 9
-        }
-      ]
+      // this.getRankList(20)
     },
     mounted () {
       this.drawWordCloud()
@@ -451,7 +417,15 @@
         this.onSearch(value)
       },
       handleSearch(value) {
-        this.dataSource = value ? this.searchResult(value) : [];
+        if (value) {
+          this.axios.get('http://112.126.58.87:9000/suggest?q='+value).then(res => {
+            console.log('得到搜索建议结果', res.data)
+            this.dataSource = res.data
+          })
+        } else {
+          this.dataSource = []
+        }
+        // this.dataSource = value ? this.searchResult(value) : [];
       },
       onSearch (value) {
         console.log("搜索内容：", value)
@@ -497,6 +471,21 @@
         this.detailParams.index += 1
       },
       // 排行榜相关
+      getRankList (n) {
+        if (n > 50) return
+        this.rankLoading = true
+        this.axios.get('http://112.126.58.87:9000/top_n?q='+n).then(res => {
+          console.log('得到热搜排行榜结果', res.data)
+          this.rankList = []
+          for (let i = 0; i < res.data.length; i++) {
+            this.rankList.push({
+              name: res.data[i].name,
+              value: parseInt(res.data[i].value)
+            })
+          }
+          this.rankLoading = false
+        })
+      },
       mouseEnter (index) {
         this.rankItemIndex = index
       },
@@ -511,7 +500,6 @@
       },
       loadMore () {
         console.log('加载更多')
-        this.rankLoading = true
         if (this.rankList.length >= 50) {
           // 当加载结束的时候提示已经加载完毕
           this.$message.warning('最多加载50条热门搜索')
@@ -520,15 +508,9 @@
           return
         }
         // todo 获取更多10条热搜
-        for (let i = 0; i < 10; i++) {
-          this.rankList.push(
-            {
-              name: '新增热搜'+this.getRandomInt(100000),
-              value: this.getRandomInt(100)
-            }
-          )
-        }
-        this.imageLoading = false
+        this.topn = this.topn + 10
+        if (this.topn > 50) this.topn = 50
+        this.getRankList(this.topn)
       },
       drawWordCloud () {
         // 基于准备好的dom，初始化echarts实例
