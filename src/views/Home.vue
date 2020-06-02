@@ -1,6 +1,5 @@
 <template>
   <div class="home">
-
     <a-row>
       <a-col :span="12" :offset="1">
         <a-auto-complete
@@ -15,19 +14,8 @@
             <a-select-option v-for="item in dataSource" :key="item">
               {{ item }}
             </a-select-option>
-            <!--<a-select-option v-for="item in dataSource" :key="item.category" :text="item.category">-->
-              <!--Found {{ item.query }} on-->
-              <!--<a-->
-                <!--:href="`https://s.taobao.com/search?q=${item.query}`"-->
-                <!--target="_blank"-->
-                <!--rel="noopener noreferrer"-->
-              <!--&gt;-->
-                <!--{{ item.category }}-->
-              <!--</a>-->
-              <!--<span className="global-search-item-count">{{ item.count }} results</span>-->
-            <!--</a-select-option>-->
           </template>
-          <a-input-search placeholder="搜索电影、综艺、影人" @search="onSearch" size="large" enterButton="搜索一下"></a-input-search>
+          <a-input-search placeholder="搜索电影、演员、导演" @search="onSearch" size="large" enterButton="搜索一下"></a-input-search>
         </a-auto-complete>
         <a-card :bordered="false" align="left" title="本站推荐" :body-style="{padding: '10px'}" style="margin-top: 20px">
           <a-carousel arrows autoplay>
@@ -78,40 +66,244 @@
           </a-carousel>
         </a-card>
         <a-card :bordered="false" align="left">
-          <a-tabs default-active-key="1">
-            <a-tab-pane key="1" tab="最近热门电影">
-              <a-list :grid="{ gutter: 24, column: 6 }" :data-source="hotMovie" :pagination="pagination">
+          <a-tabs default-active-key="1" @tabClick="changeTab">
+            <a-tab-pane key="1" tab="喜剧">
+              <a-list :grid="{ gutter: 24, column: 6 }" :data-source="comedyMovie" :pagination="pagination" :loading="comedyMovieLoading">
                 <a-list-item slot="renderItem" slot-scope="item, index">
-                  <a-card hoverable :body-style="{padding: '0', width: '120px', height: '200px'}" align="center">
-                    <a @click="goToDetails(hotMovie, index, '最近热门电影')">
-                      <img :src="item.imagePath" class="img">
-                      <span>{{item.name}}</span>
-                      <span style="margin-left: 10px;color: #ffa726;">{{item.score}}</span>
+                  <a-card hoverable :body-style="{padding: '0', width: '120px', height: '220px'}" align="center">
+                    <a @click="goToDetails(comedyMovie, index, '喜剧')">
+                      <img :src="item.image" class="img">
+                      <span>{{item.title | ellip}}</span>
+                      <span style="margin-left: 10px;color: #ffa726;">{{item.movie_score}}</span>
                     </a>
                   </a-card>
                 </a-list-item>
               </a-list>
             </a-tab-pane>
-            <a-tab-pane key="2" tab="最新" force-render>
-              Content of Tab Pane 2
+            <a-tab-pane key="2" tab="剧情" force-render>
+              <a-list :grid="{ gutter: 24, column: 6 }" :data-source="plotMovie" :pagination="pagination" :loading="plotMovieLoading">
+                <a-list-item slot="renderItem" slot-scope="item, index">
+                  <a-card hoverable :body-style="{padding: '0', width: '120px', height: '220px'}" align="center">
+                    <a @click="goToDetails(plotMovie, index, '剧情')">
+                      <img :src="item.image" class="img">
+                      <span>{{item.title | ellip}}</span>
+                      <span style="margin-left: 10px;color: #ffa726;">{{item.movie_score}}</span>
+                    </a>
+                  </a-card>
+                </a-list-item>
+              </a-list>
             </a-tab-pane>
-            <a-tab-pane key="3" tab="豆瓣高分">
-              Content of Tab Pane 3
+            <a-tab-pane key="3" tab="犯罪">
+              <a-list :grid="{ gutter: 24, column: 6 }" :data-source="crimeMovie" :pagination="pagination" :loading="crimeMovieLoading">
+                <a-list-item slot="renderItem" slot-scope="item, index">
+                  <a-card hoverable :body-style="{padding: '0', width: '120px', height: '220px'}" align="center">
+                    <a @click="goToDetails(crimeMovie, index, '犯罪')">
+                      <img :src="item.image" class="img">
+                      <span>{{item.title | ellip}}</span>
+                      <span style="margin-left: 10px;color: #ffa726;">{{item.movie_score}}</span>
+                    </a>
+                  </a-card>
+                </a-list-item>
+              </a-list>
             </a-tab-pane>
-            <a-tab-pane key="4" tab="冷门佳片">
-              Content of Tab Pane 4
+            <a-tab-pane key="4" tab="动作">
+              <a-list :grid="{ gutter: 24, column: 6 }" :data-source="actionMovie" :pagination="pagination" :loading="actionMovieLoading">
+                <a-list-item slot="renderItem" slot-scope="item, index">
+                  <a-card hoverable :body-style="{padding: '0', width: '120px', height: '220px'}" align="center">
+                    <a @click="goToDetails(actionMovie, index, '动作')">
+                      <img :src="item.image" class="img">
+                      <span>{{item.title | ellip}}</span>
+                      <span style="margin-left: 10px;color: #ffa726;">{{item.movie_score}}</span>
+                    </a>
+                  </a-card>
+                </a-list-item>
+              </a-list>
             </a-tab-pane>
-            <a-tab-pane key="5" tab="华语">
-              Content of Tab Pane 5
+            <a-tab-pane key="5" tab="恐怖">
+              <a-list :grid="{ gutter: 24, column: 6 }" :data-source="terrorMovie" :pagination="pagination" :loading="terrorMovieLoading">
+                <a-list-item slot="renderItem" slot-scope="item, index">
+                  <a-card hoverable :body-style="{padding: '0', width: '120px', height: '220px'}" align="center">
+                    <a @click="goToDetails(terrorMovie, index, '恐怖')">
+                      <img :src="item.image" class="img">
+                      <span>{{item.title | ellip}}</span>
+                      <span style="margin-left: 10px;color: #ffa726;">{{item.movie_score}}</span>
+                    </a>
+                  </a-card>
+                </a-list-item>
+              </a-list>
             </a-tab-pane>
-            <a-tab-pane key="6" tab="欧美">
-              Content of Tab Pane 6
+            <a-tab-pane key="6" tab="悬疑">
+              <a-list :grid="{ gutter: 24, column: 6 }" :data-source="suspenseMovie" :pagination="pagination" :loading="suspenseMovieLoading">
+                <a-list-item slot="renderItem" slot-scope="item, index">
+                  <a-card hoverable :body-style="{padding: '0', width: '120px', height: '220px'}" align="center">
+                    <a @click="goToDetails(suspenseMovie, index, '悬疑')">
+                      <img :src="item.image" class="img">
+                      <span>{{item.title | ellip}}</span>
+                      <span style="margin-left: 10px;color: #ffa726;">{{item.movie_score}}</span>
+                    </a>
+                  </a-card>
+                </a-list-item>
+              </a-list>
             </a-tab-pane>
-            <a-tab-pane key="7" tab="韩国">
-              Content of Tab Pane 7
+            <a-tab-pane key="7" tab="爱情">
+              <a-list :grid="{ gutter: 24, column: 6 }" :data-source="loveMovie" :pagination="pagination" :loading="loveMovieLoading">
+                <a-list-item slot="renderItem" slot-scope="item, index">
+                  <a-card hoverable :body-style="{padding: '0', width: '120px', height: '220px'}" align="center">
+                    <a @click="goToDetails(loveMovie, index, '爱情')">
+                      <img :src="item.image" class="img">
+                      <span>{{item.title | ellip}}</span>
+                      <span style="margin-left: 10px;color: #ffa726;">{{item.movie_score}}</span>
+                    </a>
+                  </a-card>
+                </a-list-item>
+              </a-list>
             </a-tab-pane>
-            <a-tab-pane key="8" tab="日本">
-              Content of Tab Pane 8
+            <a-tab-pane key="8" tab="战争">
+              <a-list :grid="{ gutter: 24, column: 6 }" :data-source="warMovie" :pagination="pagination" :loading="warMovieLoading">
+                <a-list-item slot="renderItem" slot-scope="item, index">
+                  <a-card hoverable :body-style="{padding: '0', width: '120px', height: '220px'}" align="center">
+                    <a @click="goToDetails(warMovie, index, '战争')">
+                      <img :src="item.image" class="img">
+                      <span>{{item.title | ellip}}</span>
+                      <span style="margin-left: 10px;color: #ffa726;">{{item.movie_score}}</span>
+                    </a>
+                  </a-card>
+                </a-list-item>
+              </a-list>
+            </a-tab-pane>
+            <a-tab-pane key="9" tab="科幻">
+              <a-list :grid="{ gutter: 24, column: 6 }" :data-source="fictionMovie" :pagination="pagination" :loading="fictionMovieLoading">
+                <a-list-item slot="renderItem" slot-scope="item, index">
+                  <a-card hoverable :body-style="{padding: '0', width: '120px', height: '220px'}" align="center">
+                    <a @click="goToDetails(fictionMovie, index, '科幻')">
+                      <img :src="item.image" class="img">
+                      <span>{{item.title | ellip}}</span>
+                      <span style="margin-left: 10px;color: #ffa726;">{{item.movie_score}}</span>
+                    </a>
+                  </a-card>
+                </a-list-item>
+              </a-list>
+            </a-tab-pane>
+            <a-tab-pane key="10" tab="动画">
+              <a-list :grid="{ gutter: 24, column: 6 }" :data-source="cartoonMovie" :pagination="pagination" :loading="cartoonMovieLoading">
+                <a-list-item slot="renderItem" slot-scope="item, index">
+                  <a-card hoverable :body-style="{padding: '0', width: '120px', height: '220px'}" align="center">
+                    <a @click="goToDetails(cartoonMovie, index, '动画')">
+                      <img :src="item.image" class="img">
+                      <span>{{item.title | ellip}}</span>
+                      <span style="margin-left: 10px;color: #ffa726;">{{item.movie_score}}</span>
+                    </a>
+                  </a-card>
+                </a-list-item>
+              </a-list>
+            </a-tab-pane>
+          </a-tabs>
+        </a-card>
+        <a-card :bordered="false" align="left">
+          <a-tabs default-active-key="1">
+            <a-tab-pane key="1" tab="大陆">
+              <a-list :grid="{ gutter: 24, column: 6 }" :data-source="mainlandMovie" :pagination="pagination" :loading="mainlandMovieLoading">
+                <a-list-item slot="renderItem" slot-scope="item, index">
+                  <a-card hoverable :body-style="{padding: '0', width: '120px', height: '220px'}" align="center">
+                    <a @click="goToDetails(mainlandMovie, index, '大陆')">
+                      <img :src="item.image" class="img">
+                      <span>{{item.title | ellip}}</span>
+                      <span style="margin-left: 10px;color: #ffa726;">{{item.movie_score}}</span>
+                    </a>
+                  </a-card>
+                </a-list-item>
+              </a-list>
+            </a-tab-pane>
+            <a-tab-pane key="2" tab="香港" force-render>
+              <a-list :grid="{ gutter: 24, column: 6 }" :data-source="HongKongMovie" :pagination="pagination" :loading="HongKongMovieLoading">
+                <a-list-item slot="renderItem" slot-scope="item, index">
+                  <a-card hoverable :body-style="{padding: '0', width: '120px', height: '220px'}" align="center">
+                    <a @click="goToDetails(HongKongMovie, index, '香港')">
+                      <img :src="item.image" class="img">
+                      <span>{{item.title | ellip}}</span>
+                      <span style="margin-left: 10px;color: #ffa726;">{{item.movie_score}}</span>
+                    </a>
+                  </a-card>
+                </a-list-item>
+              </a-list>
+            </a-tab-pane>
+            <a-tab-pane key="3" tab="台湾">
+              <a-list :grid="{ gutter: 24, column: 6 }" :data-source="TaiwanMovie" :pagination="pagination" :loading="TaiwanMovieLoading">
+                <a-list-item slot="renderItem" slot-scope="item, index">
+                  <a-card hoverable :body-style="{padding: '0', width: '120px', height: '220px'}" align="center">
+                    <a @click="goToDetails(TaiwanMovie, index, '台湾')">
+                      <img :src="item.image" class="img">
+                      <span>{{item.title | ellip}}</span>
+                      <span style="margin-left: 10px;color: #ffa726;">{{item.movie_score}}</span>
+                    </a>
+                  </a-card>
+                </a-list-item>
+              </a-list>
+            </a-tab-pane>
+            <a-tab-pane key="4" tab="美国">
+              <a-list :grid="{ gutter: 24, column: 6 }" :data-source="USMovie" :pagination="pagination" :loading="USMovieLoading">
+                <a-list-item slot="renderItem" slot-scope="item, index">
+                  <a-card hoverable :body-style="{padding: '0', width: '120px', height: '220px'}" align="center">
+                    <a @click="goToDetails(USMovie, index, '美国')">
+                      <img :src="item.image" class="img">
+                      <span>{{item.title | ellip}}</span>
+                      <span style="margin-left: 10px;color: #ffa726;">{{item.movie_score}}</span>
+                    </a>
+                  </a-card>
+                </a-list-item>
+              </a-list>
+            </a-tab-pane>
+            <a-tab-pane key="5" tab="日本">
+              <a-list :grid="{ gutter: 24, column: 6 }" :data-source="JapanMovie" :pagination="pagination" :loading="JapanMovieLoading">
+                <a-list-item slot="renderItem" slot-scope="item, index">
+                  <a-card hoverable :body-style="{padding: '0', width: '120px', height: '220px'}" align="center">
+                    <a @click="goToDetails(JapanMovie, index, '日本')">
+                      <img :src="item.image" class="img">
+                      <span>{{item.title | ellip}}</span>
+                      <span style="margin-left: 10px;color: #ffa726;">{{item.movie_score}}</span>
+                    </a>
+                  </a-card>
+                </a-list-item>
+              </a-list>
+            </a-tab-pane>
+            <a-tab-pane key="6" tab="韩国">
+              <a-list :grid="{ gutter: 24, column: 6 }" :data-source="KoreaMovie" :pagination="pagination" :loading="KoreaMovieLoading">
+                <a-list-item slot="renderItem" slot-scope="item, index">
+                  <a-card hoverable :body-style="{padding: '0', width: '120px', height: '220px'}" align="center">
+                    <a @click="goToDetails(KoreaMovie, index, '韩国')">
+                      <img :src="item.image" class="img">
+                      <span>{{item.title | ellip}}</span>
+                      <span style="margin-left: 10px;color: #ffa726;">{{item.movie_score}}</span>
+                    </a>
+                  </a-card>
+                </a-list-item>
+              </a-list>
+            </a-tab-pane>
+            <a-tab-pane key="7" tab="英国">
+              <a-list :grid="{ gutter: 24, column: 6 }" :data-source="UKMovie" :pagination="pagination" :loading="UKMovieLoading">
+                <a-list-item slot="renderItem" slot-scope="item, index">
+                  <a-card hoverable :body-style="{padding: '0', width: '120px', height: '220px'}" align="center">
+                    <a @click="goToDetails(UKMovie, index, '英国')">
+                      <img :src="item.image" class="img">
+                      <span>{{item.title | ellip}}</span>
+                      <span style="margin-left: 10px;color: #ffa726;">{{item.movie_score}}</span>
+                    </a>
+                  </a-card>
+                </a-list-item>
+              </a-list>
+            </a-tab-pane>
+            <a-tab-pane key="8" tab="泰国">
+              <a-list :grid="{ gutter: 24, column: 6 }" :data-source="ThailandMovie" :pagination="pagination" :loading="ThailandMovieLoading">
+                <a-list-item slot="renderItem" slot-scope="item, index">
+                  <a-card hoverable :body-style="{padding: '0', width: '120px', height: '220px'}" align="center">
+                    <a @click="goToDetails(ThailandMovie, index, '泰国')">
+                      <img :src="item.image" class="img">
+                      <span>{{item.title | ellip}}</span>
+                      <span style="margin-left: 10px;color: #ffa726;">{{item.movie_score}}</span>
+                    </a>
+                  </a-card>
+                </a-list-item>
+              </a-list>
             </a-tab-pane>
           </a-tabs>
         </a-card>
@@ -125,11 +317,11 @@
                     <p>Content</p>
                   </template>
                   <template slot="title">
-                    <span>{{item.name}}</span>
+                    <span>{{item.title}}</span>
                   </template>
                   <a>
-                    <img :src="item.imagePath" class="img">
-                    <span>{{item.name}}</span>
+                    <img :src="item.image" class="img">
+                    <span>{{item.title}}</span>
                     <span style="margin-left: 10px;color: #ffa726;">{{item.score}}</span>
                   </a>
                 </a-popover>
@@ -225,7 +417,7 @@
             </a>
           </a-col>
           <a-col :span="22" align="center">
-            <img :src="detailParams.data[detailParams.index].imagePath">
+            <img :src="detailParams.data[detailParams.index].image">
           </a-col>
           <a-col :span="1">
             <a @click="toRight">
@@ -236,16 +428,16 @@
         <a-divider></a-divider>
         <a-row>
           <span>名称：</span>
-          <span>{{detailParams.data[detailParams.index].name}}</span>
+          <span>{{detailParams.data[detailParams.index].title}}</span>
           <span style="margin-left: 20px">评分：</span>
-          <span>{{detailParams.data[detailParams.index].score}}</span>
+          <span>{{detailParams.data[detailParams.index].movie_score}}</span>
         </a-row>
         <a-row>
           <!--<span>{{messageId}}</span>-->
           <span v-html="detailParams.data[detailParams.index].description"></span>
-          <a style="margin-left: 10px">
+          <a style="margin-left: 10px" @click="onSearch(detailParams.data[detailParams.index].title)">
             <!--<img src="@/assets/imgs/u2027.png">-->
-            <span>查看消息详情</span>
+            <span>搜索电影名</span>
           </a>
         </a-row>
       </div>
@@ -254,9 +446,12 @@
 </template>
 
 <script>
-
   import ARow from "ant-design-vue/es/grid/Row";
   import ACol from "ant-design-vue/es/grid/Col";
+  import store from '../store'
+  import Vue from 'vue'
+  import getters from '../store/getters'
+
   export default {
     name: 'Home',
     components: {ACol, ARow},
@@ -272,8 +467,49 @@
     },
     data() {
       return {
-        dataSource: [],
-        hotMovie: [],
+        // dataSource: store.getters.tipsVisual?Vue.ls.get('SEARCH_HISTORY', []):[],  // 初始搜索提示先查看浏览器存储的数据
+        dataSource: Vue.ls.get('SEARCH_HISTORY', []),
+        dataSourceShow: true,
+        hotMovie: [], // 热门电影
+        // 类别
+        comedyMovie: [],  // 喜剧
+        comedyMovieLoading: true,
+        plotMovie: [],  // 剧情
+        plotMovieLoading: true,
+        crimeMovie: [], //犯罪
+        crimeMovieLoading: true,
+        actionMovie: [],  // 动作
+        actionMovieLoading: true,
+        terrorMovie: [],  // 恐怖
+        terrorMovieLoading: true,
+        suspenseMovie: [],  // 悬疑
+        suspenseMovieLoading: true,
+        loveMovie: [],  // 爱情
+        loveMovieLoading: true,
+        warMovie: [],  // 战争
+        warMovieLoading: true,
+        fictionMovie: [],  // 科幻
+        fictionMovieLoading: true,
+        cartoonMovie: [],  // 动画
+        cartoonMovieLoading: true,
+        // 地区
+        mainlandMovie: [],  // 大陆
+        mainlandMovieLoading: true,
+        HongKongMovie: [],  // 香港
+        HongKongMovieLoading: true,
+        TaiwanMovie: [],  // 台湾
+        TaiwanMovieLoading: true,
+        USMovie: [],  // 美国
+        USMovieLoading: true,
+        JapanMovie: [],  // 日本
+        JapanMovieLoading: true,
+        KoreaMovie: [],  // 韩国
+        KoreaMovieLoading: true,
+        UKMovie: [],  // 英国
+        UKMovieLoading: true,
+        ThailandMovie: [],  // 泰国
+        ThailandMovieLoading: true,
+        // mainlandMovie: [],  // 大陆
         comingMovie: [],
         // 排行相关
         topn: 10,  // 请求top n的参数
@@ -284,6 +520,7 @@
         busy: false, // vue-infinite-scroll需要用到
         rankLoading: false, // vue-infinite-scroll需要用到
 
+        // todo 小bug 应该分不同的页面
         page: 1,  // 用来计算大图总的index
         pagination: {
           onChange: page => {
@@ -291,6 +528,8 @@
             this.page = page
           },
           pageSize: 12,
+          // page: 2,
+          // current: 1,
           size: 'small',
           align: 'center'
         },
@@ -303,148 +542,266 @@
       };
     },
     created () {
-      this.hotMovie = [
-        {
-          'imagePath': 'https://img1.doubanio.com/view/photo/s_ratio_poster/public/p2574861328.jpg',
-          'name': '大话西游之大圣娶亲',
-          'score': 8.3,
-          'description': '楚门（金•凯瑞 Jim Carrey 饰）是一个平凡得不能再平凡的人，除了一些有些稀奇的经历之外——初恋女友突然失踪、溺水身亡的父亲忽然似乎又出现在眼前，他和绝大多数30多岁的美国男人绝无异样。这令他倍感失落。他也曾试过离开自己生活了多年的地方，但总因种种理由而不能成行。'
-        },
-        {
-          'imagePath': 'https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2591946932.jpg',
-          'name': '你的名字',
-          'score': 8.3,
-          'description': '楚门（金•凯瑞 Jim Carrey 饰）是一个平凡得不能再平凡的人，除了一些有些稀奇的经历之外——初恋女友突然失踪、溺水身亡的父亲忽然似乎又出现在眼前，他和绝大多数30多岁的美国男人绝无异样。这令他倍感失落。他也曾试过离开自己生活了多年的地方，但总因种种理由而不能成行。'
-        },
-        {
-          'imagePath': 'https://img9.doubanio.com/view/photo/s_ratio_poster/public/p2594916975.jpg',
-          'name': '你的名字',
-          'score': 8.3,
-          'description': '楚门（金•凯瑞 Jim Carrey 饰）是一个平凡得不能再平凡的人，除了一些有些稀奇的经历之外——初恋女友突然失踪、溺水身亡的父亲忽然似乎又出现在眼前，他和绝大多数30多岁的美国男人绝无异样。这令他倍感失落。他也曾试过离开自己生活了多年的地方，但总因种种理由而不能成行。'
-        },
-        {
-          'imagePath': 'https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2593425210.jpg',
-          'name': '你的名字',
-          'score': 8.3,
-          'description': '楚门（金•凯瑞 Jim Carrey 饰）是一个平凡得不能再平凡的人，除了一些有些稀奇的经历之外——初恋女友突然失踪、溺水身亡的父亲忽然似乎又出现在眼前，他和绝大多数30多岁的美国男人绝无异样。这令他倍感失落。他也曾试过离开自己生活了多年的地方，但总因种种理由而不能成行。'
-        },
-        {
-          'imagePath': 'https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2576090251.jpg',
-          'name': '你的名字',
-          'score': 8.3,
-          'description': '楚门（金•凯瑞 Jim Carrey 饰）是一个平凡得不能再平凡的人，除了一些有些稀奇的经历之外——初恋女友突然失踪、溺水身亡的父亲忽然似乎又出现在眼前，他和绝大多数30多岁的美国男人绝无异样。这令他倍感失落。他也曾试过离开自己生活了多年的地方，但总因种种理由而不能成行。'
-        },
-        {
-          'imagePath': 'https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2527484082.jpg',
-          'name': '你的名字',
-          'score': 8.3,
-          'description': '楚门（金•凯瑞 Jim Carrey 饰）是一个平凡得不能再平凡的人，除了一些有些稀奇的经历之外——初恋女友突然失踪、溺水身亡的父亲忽然似乎又出现在眼前，他和绝大多数30多岁的美国男人绝无异样。这令他倍感失落。他也曾试过离开自己生活了多年的地方，但总因种种理由而不能成行。'
-        },
-        {
-          'imagePath': 'https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2555927320.jpg',
-          'name': '你的名字',
-          'score': 8.3,
-          'description': '楚门（金•凯瑞 Jim Carrey 饰）是一个平凡得不能再平凡的人，除了一些有些稀奇的经历之外——初恋女友突然失踪、溺水身亡的父亲忽然似乎又出现在眼前，他和绝大多数30多岁的美国男人绝无异样。这令他倍感失落。他也曾试过离开自己生活了多年的地方，但总因种种理由而不能成行。'
-        },
-        {
-          'imagePath': 'https://img9.doubanio.com/view/photo/s_ratio_poster/public/p2579407695.jpg',
-          'name': '你的名字',
-          'score': 8.3,
-          'description': '楚门（金•凯瑞 Jim Carrey 饰）是一个平凡得不能再平凡的人，除了一些有些稀奇的经历之外——初恋女友突然失踪、溺水身亡的父亲忽然似乎又出现在眼前，他和绝大多数30多岁的美国男人绝无异样。这令他倍感失落。他也曾试过离开自己生活了多年的地方，但总因种种理由而不能成行。'
-        },
-        {
-          'imagePath': 'https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2586366121.jpg',
-          'name': '你的名字',
-          'score': 8.3,
-          'description': '楚门（金•凯瑞 Jim Carrey 饰）是一个平凡得不能再平凡的人，除了一些有些稀奇的经历之外——初恋女友突然失踪、溺水身亡的父亲忽然似乎又出现在眼前，他和绝大多数30多岁的美国男人绝无异样。这令他倍感失落。他也曾试过离开自己生活了多年的地方，但总因种种理由而不能成行。'
-        },
-        {
-          'imagePath': 'https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2576090251.jpg',
-          'name': '你的名字',
-          'score': 8.3,
-          'description': '楚门（金•凯瑞 Jim Carrey 饰）是一个平凡得不能再平凡的人，除了一些有些稀奇的经历之外——初恋女友突然失踪、溺水身亡的父亲忽然似乎又出现在眼前，他和绝大多数30多岁的美国男人绝无异样。这令他倍感失落。他也曾试过离开自己生活了多年的地方，但总因种种理由而不能成行。'
-        },
-        {
-          'imagePath': 'https://img1.doubanio.com/view/photo/s_ratio_poster/public/p2570059839.jpg',
-          'name': '你的名字',
-          'score': 8.3,
-          'description': '楚门（金•凯瑞 Jim Carrey 饰）是一个平凡得不能再平凡的人，除了一些有些稀奇的经历之外——初恋女友突然失踪、溺水身亡的父亲忽然似乎又出现在眼前，他和绝大多数30多岁的美国男人绝无异样。这令他倍感失落。他也曾试过离开自己生活了多年的地方，但总因种种理由而不能成行。'
-        }
-      ]
-      for (let i = 0; this.hotMovie.length < 50; i++) {
-        this.hotMovie.push(this.hotMovie[this.getRandomInt(11)])
-      }
+      this.bootstrap()
+      this.test()
+      this.getComedyMovie()  // 喜剧
+      this.sleep(2000).then(() => {
+        this.getPlotMovie()  // 剧情
+        this.sleep(1000).then(() => {
+          this.getCrimeMovie()  // 犯罪
+          this.sleep(1000).then(() => {
+            this.getActionMovie()  // 动作
+            this.sleep(1000).then(() => {
+              this.getTerrorMovie()  // 恐怖
+              this.getSuspenseMovie()  // 悬疑
+              this.getLoveMovie()  // 爱情
+              this.getWarMovie()  // 战争
+              this.getFictionMovie()  // 科幻
+              this.getCartoonMovie()  // 动画
+            })
+          })
+        })
+      })
+      this.getMainlandMovie()  // 大陆
+      this.sleep(2000).then(() => {
+        this.getHongKongdMovie()  // 香港
+        this.sleep(1000).then(() => {
+          this.getTaiwanMovie()  // 台湾
+          this.sleep(1000).then(() => {
+            this.getUSMovie()  // 美国
+            this.sleep(1000).then(() => {
+              this.getJapanMovie()  // 日本
+              this.getKoreaMovie()  // 韩国
+              this.getUKMovie()  // 英国
+              this.getThailandMovie()  // 泰国
+            })
+          })
+        })
+      })
       this.comingMovie = [
         {
-          'imagePath': 'https://img1.doubanio.com/view/photo/s_ratio_poster/public/p2579398648.webp',
-          'name': '秘密访客',
+          'image': 'https://img1.doubanio.com/view/photo/s_ratio_poster/public/p2579398648.webp',
+          'title': '秘密访客',
           'time': '06月25日',
           'description': '楚门（金•凯瑞 Jim Carrey 饰）是一个平凡得不能再平凡的人，除了一些有些稀奇的经历之外——初恋女友突然失踪、溺水身亡的父亲忽然似乎又出现在眼前，他和绝大多数30多岁的美国男人绝无异样。这令他倍感失落。他也曾试过离开自己生活了多年的地方，但总因种种理由而不能成行。'
         },
         {
-          'imagePath': 'https://img1.doubanio.com/view/photo/s_ratio_poster/public/p2522497098.webp',
-          'name': '六月的秘密',
+          'image': 'https://img1.doubanio.com/view/photo/s_ratio_poster/public/p2522497098.webp',
+          'title': '六月的秘密',
           'time': '06月21日',
           'description': '楚门（金•凯瑞 Jim Carrey 饰）是一个平凡得不能再平凡的人，除了一些有些稀奇的经历之外——初恋女友突然失踪、溺水身亡的父亲忽然似乎又出现在眼前，他和绝大多数30多岁的美国男人绝无异样。这令他倍感失落。他也曾试过离开自己生活了多年的地方，但总因种种理由而不能成行。'
         },
         {
-          'imagePath': 'https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2577837112.webp',
-          'name': '奇妙国王之魔法奇缘',
+          'image': 'https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2577837112.webp',
+          'title': '奇妙国王之魔法奇缘',
           'time': '06月21日',
           'description': '楚门（金•凯瑞 Jim Carrey 饰）是一个平凡得不能再平凡的人，除了一些有些稀奇的经历之外——初恋女友突然失踪、溺水身亡的父亲忽然似乎又出现在眼前，他和绝大多数30多岁的美国男人绝无异样。这令他倍感失落。他也曾试过离开自己生活了多年的地方，但总因种种理由而不能成行。'
         },
         {
-          'imagePath': 'https://img9.doubanio.com/view/photo/s_ratio_poster/public/p2579189776.webp',
-          'name': '亲亲哒',
+          'image': 'https://img9.doubanio.com/view/photo/s_ratio_poster/public/p2579189776.webp',
+          'title': '亲亲哒',
           'time': '06月21日',
           'description': '楚门（金•凯瑞 Jim Carrey 饰）是一个平凡得不能再平凡的人，除了一些有些稀奇的经历之外——初恋女友突然失踪、溺水身亡的父亲忽然似乎又出现在眼前，他和绝大多数30多岁的美国男人绝无异样。这令他倍感失落。他也曾试过离开自己生活了多年的地方，但总因种种理由而不能成行。'
         },
         {
-          'imagePath': 'https://img1.doubanio.com/view/photo/s_ratio_poster/public/p2595969179.webp',
-          'name': '我想静静',
+          'image': 'https://img1.doubanio.com/view/photo/s_ratio_poster/public/p2595969179.webp',
+          'title': '我想静静',
           'time': '06月21日',
           'description': '楚门（金•凯瑞 Jim Carrey 饰）是一个平凡得不能再平凡的人，除了一些有些稀奇的经历之外——初恋女友突然失踪、溺水身亡的父亲忽然似乎又出现在眼前，他和绝大多数30多岁的美国男人绝无异样。这令他倍感失落。他也曾试过离开自己生活了多年的地方，但总因种种理由而不能成行。'
         }
       ]
-      // this.getRankList(20)
     },
     mounted () {
       this.drawWordCloud()
     },
+    activated () {
+      this.rankList = [0]
+      this.topn = 10
+      this.dataSource = Vue.ls.get('SEARCH_HISTORY', [])
+      this.loadMore()
+    },
     methods: {
-      onSelect(value) {
-        console.log('onSelect', value);
-        this.onSearch(value)
+      bootstrap () {
+        // this.dataSource = Vue.ls.get('SEARCH_HISTORY', [])
+        // if (!store.getters.tipsVisual) {
+        //   this.dataSourceShow = false
+        // }
       },
+      test(){
+        console.log('测试中内容：')
+        console.log(store.getters.tipsVisual)
+        console.log(store.getters.pageSize)
+        console.log(store.getters.predictable)
+        console.log('测试查询本地搜索历史:', this.dataSource)
+        // Vue.ls.set('SEARCH_HISTORY', ['少年的你', '肖申克的救赎', '操蛋操蛋'])
+        // console.log(Vue.ls.get('SEARCH_HISTORY1', ['测试一下', '操蛋操蛋']))
+      },
+      // 按照类别获取电影
+      getComedyMovie () {  // 喜剧
+        this.axios.get('http://112.126.58.87:9000/search/?category=喜剧&source=0&size=50').then(res => {
+          console.log('获得喜剧电影数据为：', res)
+          this.comedyMovie = res.data.resultBody.movieList
+          this.comedyMovieLoading = false
+        })
+      },
+      getPlotMovie () {  // 剧情
+        this.axios.get('http://112.126.58.87:9000/search/?category=剧情&source=0&size=50').then(res => {
+          console.log('获得剧情电影数据为：', res)
+          this.plotMovie = res.data.resultBody.movieList
+          this.plotMovieLoading = false
+        })
+      },
+      getCrimeMovie () {  // 犯罪
+        this.axios.get('http://112.126.58.87:9000/search/?category=犯罪&source=0&size=50').then(res => {
+          console.log('获得犯罪电影数据为：', res)
+          this.crimeMovie = res.data.resultBody.movieList
+          this.crimeMovieLoading = false
+        })
+      },
+      getActionMovie () {  // 动作
+        this.axios.get('http://112.126.58.87:9000/search/?category=动作&source=0&size=50').then(res => {
+          console.log('获得动作电影数据为：', res)
+          this.actionMovie = res.data.resultBody.movieList
+          this.actionMovieLoading = false
+        })
+      },
+      getTerrorMovie () {  // 恐怖
+        this.axios.get('http://112.126.58.87:9000/search/?category=恐怖&source=0&size=50').then(res => {
+          console.log('获得恐怖电影数据为：', res)
+          this.terrorMovie = res.data.resultBody.movieList
+          this.terrorMovieLoading = false
+        })
+      },
+      getSuspenseMovie () {  // 悬疑
+        this.axios.get('http://112.126.58.87:9000/search/?category=悬疑&source=0&size=50').then(res => {
+          console.log('获得悬疑电影数据为：', res)
+          this.suspenseMovie = res.data.resultBody.movieList
+          this.suspenseMovieLoading = false
+        })
+      },
+      getLoveMovie () {  // 爱情
+        this.axios.get('http://112.126.58.87:9000/search/?category=爱情&source=0&size=50').then(res => {
+          console.log('获得爱情电影数据为：', res)
+          this.loveMovie = res.data.resultBody.movieList
+          this.loveMovieLoading = false
+        })
+      },
+      getWarMovie () {  // 战争
+        this.axios.get('http://112.126.58.87:9000/search/?category=战争&source=0&size=50').then(res => {
+          console.log('获得战争电影数据为：', res)
+          this.warMovie = res.data.resultBody.movieList
+          this.warMovieLoading = false
+        })
+      },
+      getFictionMovie () {  // 科幻
+        this.axios.get('http://112.126.58.87:9000/search/?category=科幻&source=0&size=50').then(res => {
+          console.log('获得科幻电影数据为：', res)
+          this.fictionMovie = res.data.resultBody.movieList
+          this.fictionMovieLoading = false
+        })
+      },
+      getCartoonMovie () {  // 动画
+        this.axios.get('http://112.126.58.87:9000/search/?category=动画&source=0&size=50').then(res => {
+          console.log('获得剧情动画数据为：', res)
+          this.cartoonMovie = res.data.resultBody.movieList
+          this.cartoonMovieLoading = false
+        })
+      },
+      // 按照地区获取电影
+      getMainlandMovie () {  // 大陆
+        this.axios.get('http://112.126.58.87:9000/search/?area=大陆&source=0&size=50').then(res => {
+          console.log('获得大陆电影数据为：', res)
+          this.mainlandMovie = res.data.resultBody.movieList
+          this.mainlandMovieLoading = false
+        })
+      },
+      getHongKongdMovie () {  // 香港
+        this.axios.get('http://112.126.58.87:9000/search/?area=香港&source=0&size=50').then(res => {
+          console.log('获得香港电影数据为：', res)
+          this.HongKongMovie = res.data.resultBody.movieList
+          this.HongKongMovieLoading = false
+        })
+      },
+      getTaiwanMovie () {  // 台湾
+        this.axios.get('http://112.126.58.87:9000/search/?area=台湾&source=0&size=50').then(res => {
+          console.log('获得台湾电影数据为：', res)
+          this.TaiwanMovie = res.data.resultBody.movieList
+          this.TaiwanMovieLoading = false
+        })
+      },
+      getUSMovie () {  // 美国
+        this.axios.get('http://112.126.58.87:9000/search/?area=美国&source=0&size=50').then(res => {
+          console.log('获得美国电影数据为：', res)
+          this.USMovie = res.data.resultBody.movieList
+          this.USMovieLoading = false
+        })
+      },
+      getJapanMovie () {  // 日本
+        this.axios.get('http://112.126.58.87:9000/search/?area=日本&source=0&size=50').then(res => {
+          console.log('获得日本电影数据为：', res)
+          this.JapanMovie = res.data.resultBody.movieList
+          this.JapanMovieLoading = false
+        })
+      },
+      getKoreaMovie () {  // 韩国
+        this.axios.get('http://112.126.58.87:9000/search/?area=韩国&source=0&size=50').then(res => {
+          console.log('获得韩国电影数据为：', res)
+          this.KoreaMovie = res.data.resultBody.movieList
+          this.KoreaMovieLoading = false
+        })
+      },
+      getUKMovie () {  // 英国
+        this.axios.get('http://112.126.58.87:9000/search/?area=英国&source=0&size=50').then(res => {
+          console.log('获得英国电影数据为：', res)
+          this.UKMovie = res.data.resultBody.movieList
+          this.UKMovieLoading = false
+        })
+      },
+      getThailandMovie () {  // 泰国
+        this.axios.get('http://112.126.58.87:9000/search/?area=泰国&source=0&size=50').then(res => {
+          console.log('获得泰国电影数据为：', res)
+          this.ThailandMovie = res.data.resultBody.movieList
+          this.ThailandMovieLoading = false
+        })
+      },
+      // 停顿多少毫秒后执行下面的函数
+      sleep (time) {
+        return new Promise((resolve) => setTimeout(resolve, time));
+      },
+      // 搜索框提示及搜索
       handleSearch(value) {
-        if (value) {
-          this.axios.get('http://112.126.58.87:9000/suggest?q='+value).then(res => {
+        // console.log('是否提示：', store.getters.tipsVisual)
+        if (value!== ''&&value.trim()!=='') { // 如果输入value不为空且不为空格字符串，则请求
+          this.axios.get('http://112.126.58.87:9000/suggest?q='+value.trim()).then(res => {
             console.log('得到搜索建议结果', res.data)
             this.dataSource = res.data
           })
         } else {
-          this.dataSource = []
+          // 如果输入为空或空格字符串，则获取存储到浏览器上的搜索历史
+          this.dataSource = Vue.ls.get('SEARCH_HISTORY', [])
+          console.log('从本地读取搜索历史作为搜索提示：', Vue.ls.get('SEARCH_HISTORY', []))
         }
-        // this.dataSource = value ? this.searchResult(value) : [];
+      },
+      onSelect(value) {
+        this.onSearch(value)
       },
       onSearch (value) {
-        console.log("搜索内容：", value)
-        if (value !== ''){
+        console.log("搜索内容：", value.trim())
+        if (value !== ''&&value.trim()!==''){ // 如果不为空且不为空格字符串时才进行搜索
+          let history = Vue.ls.get('SEARCH_HISTORY', [])
+          for (let i = 0; i < history.length; i++) {
+            if (value === history[i]) {
+              history.splice(i, 1)
+              break
+            }
+          }
+          history.unshift(value)
+          while (history.length > 10) {
+            history.pop()
+          }
+          Vue.ls.set('SEARCH_HISTORY', history)
           this.$router.push({ path: '/r', query: { search_text: value, source:0 } })
         }
-      },
-      getRandomInt(max, min = 0) {
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-      },
-      searchResult(query) {
-        return new Array(this.getRandomInt(10))
-          .join('.')
-          .split('.')
-          .map((item, idx) => ({
-            query,
-            category: `${query}${idx}`,
-            count: this.getRandomInt(200, 100),
-          }));
       },
       // 大图相关
       goToDetails(data, index, title) {
@@ -470,12 +827,16 @@
       toRight () {
         this.detailParams.index += 1
       },
+      changeTab (key) {
+        console.log('分页参数：', this.pagination.current)
+        // this.pagination.current = 1
+        // this.page = 1
+      },
       // 排行榜相关
       getRankList (n) {
         if (n > 50) return
         this.rankLoading = true
         this.axios.get('http://112.126.58.87:9000/top_n?q='+n).then(res => {
-          console.log('得到热搜排行榜结果', res.data)
           this.rankList = []
           for (let i = 0; i < res.data.length; i++) {
             this.rankList.push({

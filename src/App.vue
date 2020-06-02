@@ -209,7 +209,9 @@
         </a-tab-pane>
       </a-tabs>
     </a-drawer>
-    <router-view/>
+    <keep-alive>
+      <router-view/>
+    </keep-alive>
   </div>
 </template>
 
